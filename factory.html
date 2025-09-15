@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BOB Banking App — Factory Method</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f7fa; padding: 20px; }
+    .card { border: 1px solid #ccc; padding: 16px; border-radius: 8px; margin-bottom: 12px; background: #fff; }
+    label { display: block; margin-top: 8px; }
+    input, select { width: 100%; padding: 8px; margin-top: 4px; }
+    button { margin-top: 12px; padding: 10px; background: teal; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>BOB Banking App (Factory Method)</h1>
+
+  <div class="card">
+    <h3>Create Account</h3>
+    <label>Owner</label>
+    <input id="owner" placeholder="Enter name">
+
+    <label>Initial Balance</label>
+    <input id="balance" type="number" value="1000">
+
+    <label>Account Type</label>
+    <select id="type">
+      <option value="savings">Savings Account</option>
+      <option value="current">Current Account</option>
+      <option value="loan">Loan Account</option>
+    </select>
+
+    <button id="createBtn">Create Account</button>
+  </div>
+
+  <h3>Accounts Created</h3>
+  <div id="accounts"></div>
+
+  <script>
+    // ----------------------
+    // Product Classes
+    // ----------------------
+    class BankAccount {
+      constructor(owner, balance) {
+        this.owner = owner;
+        this.balance = balance;
+      }
+      describe() {
+        return `${this.constructor.name} for ${this.owner}, Balance: ₹${this.balance}`;
+      }
+    }
+
+    class SavingsAccount extends BankAccount {
+      constructor(owner, balance) {
+        super(owner, balance);
+        this.interestRate = 0.04;
+      }
+    }
+
+    class CurrentAccount extends BankAccount {
+      constructor(owner, balance) {
+        super(owner, balance);
+        this.overdraftLimit = 5000;
+      }
+    }
+
+    class LoanAccount extends BankAccount {
+      constructor(owner, balance) {
+        super(owner, -Math.abs(balance)); // loans stored as negative balance
+      }
+    }
+
+    // ----------------------
+    // Factory Method Creator
+    // ----------------------
+    class AccountFactory {
+      static createAccount(type, owner, balance) {
+        switch(type) {
+          case 'savings': return new SavingsAccount(owner, balance);
+          case 'current': return new CurrentAccount(owner, balance);
+          case 'loan': return new LoanAccount(owner, balance);
+          default: throw new Error("Unknown account type: " + type);
+        }
+      }
+    }
+
+    // ----------------------
+    // UI Glue
+    // ----------------------
+    const createBtn = document.getElementById('createBtn');
+    const accountsDiv = document.getElementById('accounts');
+
+    createBtn.addEventListener('click', () => {
+      const owner = document.getElementById('owner').value || "Unnamed";
+      const balance = Number(document.getElementById('balance').value);
+      const type = document.getElementById('type').value;
+
+      try {
+        const account = AccountFactory.createAccount(type, owner, balance);
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.textContent = account.describe();
+        accountsDiv.appendChild(div);
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+  </script>
+</body>
+</html>
